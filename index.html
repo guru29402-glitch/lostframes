@@ -401,18 +401,9 @@ const films = [
     description: "A landmark of early horror cinema.",
     url: ""
   }
-];,
-{
-  id: 7,
-  title: "Big Buck Bunny",
-  year: 2008,
-  genre: "Comedy",
-  actor: "Blender Foundation",
-  description: "An animated short film about a gentle rabbit.",
-  url: "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4"
-  }
-    
+];
 
+  
 function getWatchlist() {
   try {
     return JSON.parse(localStorage.getItem("lostframesWatchlist")) || [];
