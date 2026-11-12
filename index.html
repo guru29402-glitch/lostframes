@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LostFrames — The Art of Silence</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:#eee;font-family:Georgia,serif}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #383838}
+.logo{font-size:27px;font-weight:bold;letter-spacing:3px}
+nav a{color:#ccc;text-decoration:none;margin-left:15px;font-size:13px}
+.hero{padding:75px 7%;background:linear-gradient(90deg,#111,#292929,#111);text-align:center}
+.hero small{letter-spacing:5px;color:#aaa}
+.hero h1{font-size:clamp(38px,8vw,70px);margin:20px 0 10px}
+.hero p{color:#aaa}
+.btn{background:#eee;color:#111;padding:12px 22px;border:0;cursor:pointer;font-weight:bold}
+.section{padding:35px 6%}
+.section h2{letter-spacing:2px}
+.search{width:100%;padding:14px;background:#222;color:white;border:1px solid #555;margin:15px 0}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin:15px 0}
+.filters button{background:#222;color:#ddd;border:1px solid #555;padding:9px 14px;cursor:pointer}
+.filters button.active{background:#eee;color:#111}
+.movies{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:18px}
+.movie{background:#1d1d1d;border:1px solid #333;padding:10px}
+.poster{height:190px;background:linear-gradient(145deg,#555,#171717);display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:#eee;font-size:21px;font-weight:bold;letter-spacing:2px}
+.movie h3{font-size:16px;margin:12px 0 5px}
+.movie p{font-size:12px;color:#aaa}
+.movie button{padding:9px;background:#eee;color:#111;border:0;cursor:pointer;margin:4px 2px 0 0}
+.player{background:#202020;padding:18px;margin-top:20px}
+.player video{width:100%;max-height:420px;background:#000}
+.player input{width:100%;padding:10px;background:#111;color:white;border:1px solid #555;margin:8px 0}
+footer{text-align:center;padding:35px;color:#888;border-top:1px solid #333;font-size:12px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">LOSTFRAMES.</div>
+<nav>
+<a href="#home">HOME</a>
+<a href="#movies">MOVIES</a>
+<a href="#watchlist">WATCHLIST</a>
+</nav>
+</header>
+
+<section class="hero" id="home">
+<small>CLASSIC CINEMA • TIMELESS STORIES</small>
+<h1>THE ART OF SILENCE.</h1>
+<p>Discover forgotten stories. Experience timeless cinema.</p>
+<button class="btn" onclick="document.querySelector('#movies').scrollIntoView()">EXPLORE FILMS</button>
+</section>
+
+<section class="section" id="movies">
+<h2>THE COLLECTION</h2>
+<p style="color:#999">A journey through the golden age of silent cinema.</p>
+<input class="search" id="search" placeholder="Search movies or actors..." oninput="render()">
+
+<div class="filters" id="filters">
+<button class="active" onclick="setGenre('All',this)">ALL</button>
+<button onclick="setGenre('Comedy',this)">COMEDY</button>
+<button onclick="setGenre('Drama',this)">DRAMA</button>
+<button onclick="setGenre('Adventure',this)">ADVENTURE</button>
+<button onclick="setGenre('Mystery',this)">MYSTERY</button>
+</div>
+
+<button class="btn" onclick="randomMovie()">DISCOVER A RANDOM FILM ↗</button>
+<div class="movies" id="moviesGrid"></div>
+</section>
+
+<section class="section" id="watchlist">
+<h2>MY WATCHLIST</h2>
+<div class="movies" id="savedGrid"></div>
+</section>
+
+<section class="section" id="player">
+<h2>NOW SHOWING</h2>
+<div class="player">
+<h3 id="playingTitle">Choose a movie to begin</h3>
+<video id="video" controls playsinline></video>
+<p id="playerInfo" style="color:#aaa;font-size:13px">Select a film from the collection.</p>
+</div>
+</section>
+
+<footer>
+LOSTFRAMES © 2026<br><br>
+WHERE STORIES SPEAK WITHOUT WORDS.
+</footer>
+
+<script>
+const films = [
+{id:1,title:"The Kid",year:1921,genre:"Comedy",actor:"Charlie Chaplin",description:"A silent comedy-drama about a tramp and a child.",url:""},
+{id:2,title:"Sherlock Jr.",year:1924,genre:"Comedy",actor:"Buster Keaton",description:"A projectionist dreams of becoming a detective.",url:""},
+{id:3,title:"The General",year:1926,genre:"Adventure",actor:"Buster Keaton",description:"An adventurous silent comedy set during the Civil War.",url:""},
+{id:4,title:"Safety Last!",year:1923,genre:"Comedy",actor:"Harold Lloyd",description:"A young man's big adventure in the city.",url:""},
+{id:5,title:"The Cabinet of Dr. Caligari",year:1920,genre:"Mystery",actor:"Werner Krauss",description:"A landmark of German expressionist cinema.",url:""},
+{id:6,title:"Nosferatu",year:1922,genre:"Drama",actor:"Max Schreck",description:"A landmark of early horror cinema.",url:""}
+];
+
+let genre="All";
+let saved=JSON.parse(localStorage.getItem("lostframes-list")||"[]");
+
+function render(){
+const q=document.getElementById("search").value.toLowerCase();
+const list=films.filter(f=>(genre==="All"||f.genre===genre)&&
+(f.title+" "+f.actor+" "+f.description).toLowerCase().includes(q));
+document.getElementById("moviesGrid").innerHTML=list.map(card).join("");
+const savedFilms=films.filter(f=>saved.includes(f.id));
+document.getElementById("savedGrid").innerHTML=savedFilms.length?savedFilms.map(card).join(""):"<p style='color:#999'>Your watchlist is empty. Save a film to find it here.</p>";
+}
+
+function card(f){
+return `<article class="movie">
+<div class="poster">${f.title.toUpperCase()}</div>
+<h3>${f.title}</h3>
+<p>${f.year} · ${f.genre}<br>${f.actor}</p>
+<button onclick="playMovie(${f.id})">WATCH</button>
+<button onclick="toggleSave(${f.id})">${saved.includes(f.id)?"SAVED ✓":"＋ LIST"}</button>
+</article>`;
+}
+
+function setGenre(g,button){
+genre=g;
+document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
+button.classList.add("active");
+render();
+}
+
+function toggleSave(id){
+saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];
+localStorage.setItem("lostframes-list",JSON.stringify(saved));
+render();
+}
+
+function playMovie(id){
+const f=films.find(x=>x.id===id);
+document.getElementById("playingTitle").textContent=f.title+" ("+f.year+")";
+document.getElementById("playerInfo").textContent=f.description+" Film source must be added by the site owner.";
+const video=document.getElementById("video");
+video.pause();
+video.removeAttribute("src");
+video.load();
+if(f.url){
+video.src=f.url;
+}
+document.getElementById("player").scrollIntoView({behavior:"smooth"});
+}
+
+function randomMovie(){
+const f=films[Math.floor(Math.random()*films.length)];
+playMovie(f.id);
+}
+
+render();
+</script>
+</body>
+  </html>
+  
